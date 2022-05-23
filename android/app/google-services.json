@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "977456002632",
+    "project_id": "yeswecare-ed5f0",
+    "storage_bucket": "yeswecare-ed5f0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977456002632:android:f2e1aa5d3aba9f31744a7d",
+        "android_client_info": {
+          "package_name": "com.example.paul"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "977456002632-njdn2ls6u0bi6f5aggc2iarmkq2v2a48.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuTwrRMf0EmL0MM732BYWYolZiTBB2mEs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "977456002632-njdn2ls6u0bi6f5aggc2iarmkq2v2a48.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
