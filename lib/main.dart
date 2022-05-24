@@ -1,59 +1,37 @@
-import 'dart:html';
-
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutterfire_ui/auth.dart';
+import 'package:paul/home_page.dart';
+import 'package:paul/setting_page.dart';
 import 'firebase_options.dart';
-import 'home_page.dart';
+import 'login_register.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(
+    MaterialApp(
+      title: '',
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AuthGate(),
+        '/home': (context) => const HomePage(),
+        '/setting': (context) => SettingPage(),
+      },
+    ),
+  );
+  // runApp(const YesWeCare());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class YesWeCare extends StatelessWidget {
+  const YesWeCare({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: AuthGate(),
-    );
-  }
-}
-
-class AuthGate extends StatelessWidget {
-  const AuthGate({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      initialData: FirebaseAuth.instance.currentUser,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return SignInScreen(
-              headerBuilder: (context, constraints, _) {
-                return Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.asset('assets/logo.png'),
-                  ),
-                );
-              },
-              providerConfigs: const [
-                EmailProviderConfiguration(),
-              ]);
-        }
-
-        return const HomePage();
-      },
     );
   }
 }

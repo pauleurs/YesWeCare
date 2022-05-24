@@ -37,6 +37,7 @@ dependencies:
   firebase_core: ^1.17.0
   flutterfire_ui: ^0.4.1+1
   flutter_facebook_auth: 4.0.1
+  flutter_easyloading: ^3.0.5
 
 dev_dependencies:
   flutter_test:

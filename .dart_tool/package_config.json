@@ -158,6 +158,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_easyloading",
+      "rootUri": "file:///Users/paul/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_easyloading-3.0.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_facebook_auth",
       "rootUri": "file:///Users/paul/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_facebook_auth-4.0.1",
       "packageUri": "lib/",
@@ -186,6 +192,12 @@
       "rootUri": "file:///Users/paul/flutter/packages/flutter_localizations",
       "packageUri": "lib/",
       "languageVersion": "2.17"
+    },
+    {
+      "name": "flutter_spinkit",
+      "rootUri": "file:///Users/paul/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_spinkit-5.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "flutter_svg",
@@ -416,7 +428,7 @@
       "languageVersion": "2.17"
     }
   ],
-  "generated": "2022-05-23T20:29:31.450971Z",
+  "generated": "2022-05-24T13:46:35.703309Z",
   "generator": "pub",
   "generatorVersion": "2.17.1"
 }

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
-  Widget _appScaffold({required Widget body}) {
+  Widget _appScaffold({
+    required Widget body,
+    required BuildContext context,
+  }) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.black,
+        automaticallyImplyLeading: false,
         title: const Text(
           'Home',
           style: TextStyle(
@@ -18,18 +21,18 @@ class HomePage extends StatelessWidget {
         ),
         centerTitle: true,
         actions: <Widget>[
-          _saveButton(),
+          _saveButton(context),
         ],
       ),
       body: body,
     );
   }
 
-  Widget _saveButton() {
+  Widget _saveButton(BuildContext context) {
     return TextButton(
       onPressed: () {
-        print("Home");
-        FirebaseAuth.instance.signOut();
+        Navigator.pushNamed(context, '/setting');
+        // FirebaseAuth.instance.signOut();
       },
       child: const Icon(
         Icons.settings,
@@ -41,8 +44,8 @@ class HomePage extends StatelessWidget {
   Widget _body() {
     return SingleChildScrollView(
       child: Column(
-        children: <Widget>[
-          const SizedBox(height: 10.0),
+        children: const <Widget>[
+          SizedBox(height: 10.0),
         ],
       ),
     );
@@ -51,6 +54,9 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //  FirebaseAuth.instance.signOut();
-    return _appScaffold(body: _body());
+    return _appScaffold(
+      body: _body(),
+      context: context,
+    );
   }
 }
