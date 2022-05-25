@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
 import 'package:paul/home_page.dart';
+import 'package:paul/onboarding.dart';
 import 'package:paul/setting_page.dart';
 import 'firebase_options.dart';
 import 'login_register.dart';
@@ -18,7 +19,8 @@ Future<void> main() async {
       routes: {
         '/': (context) => const AuthGate(),
         '/home': (context) => const HomePage(),
-        '/setting': (context) => SettingPage(),
+        '/setting': (context) => const SettingPage(),
+        '/onBoarding': (context) => const Onboarding(),
       },
     ),
   );

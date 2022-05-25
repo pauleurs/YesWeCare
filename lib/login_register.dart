@@ -27,14 +27,15 @@ class AuthGate extends StatelessWidget {
               },
               providerConfigs: const [
                 EmailProviderConfiguration(),
-                GoogleProviderConfiguration(
-                  clientId:
-                      '977456002632-njdn2ls6u0bi6f5aggc2iarmkq2v2a48.apps.googleusercontent.com',
-                ),
+                PhoneProviderConfiguration(),
               ]);
         } else {
           Future.delayed(Duration.zero, () {
-            Navigator.pushNamed(context, '/home');
+            if (FirebaseAuth.instance.currentUser?.displayName == null) {
+              Navigator.pushNamed(context, '/onBoarding');
+            } else {
+              Navigator.pushNamed(context, '/home');
+            }
           });
         }
         return const SizedBox();
