@@ -40,9 +40,11 @@ class _SettingPageState extends State<SettingPage> {
     return TextButton(
         onPressed: () {
           user!.updateDisplayName('$firstName $lastName');
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Data save'),
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Data save'),
+            ),
+          );
           Navigator.pushNamed(context, '/home');
         },
         child: const Text('Save'));
