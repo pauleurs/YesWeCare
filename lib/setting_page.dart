@@ -63,7 +63,7 @@ class _SettingPageState extends State<SettingPage> {
       child: Column(
         children: [
           customTextForm(
-            (value) => firstName = value,
+            (value) => firstName = value.trim(),
             const Icon(Icons.person),
             'First name',
             firstName,

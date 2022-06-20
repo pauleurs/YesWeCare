@@ -8,8 +8,8 @@
 .buildlog/
 .history
 .svn/
-
-# IntelliJ related
+.dart_tool/
+./build/*
 *.iml
 *.ipr
 *.iws
@@ -46,7 +46,7 @@ app.*.map.json
 /android/app/release
 # Golden test
 /test/goldens
-/build
+*/build
 
 ios/build
 android/app/build

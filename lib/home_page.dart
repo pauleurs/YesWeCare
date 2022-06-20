@@ -1,12 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:flutter_map/flutter_map.dart';
-// ignore: depend_on_referenced_packages
-import 'package:latlong2/latlong.dart';
-// ignore: depend_on_referenced_packages
-import 'package:http/http.dart' as http;
 import 'package:paul/utils.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,9 +15,11 @@ class _HomePageState extends State<HomePage> {
   }) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, '/danger');
+        },
         backgroundColor: Colors.black,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.error),
       ),
       appBar: AppBar(
         elevation: 0.0,
@@ -86,7 +80,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _body() {
     return FutureBuilder<Address>(
-      future: _determinePosition(),
+      future: determinePosition(),
       builder: (BuildContext context, AsyncSnapshot<Address> snapshot) {
         if (!snapshot.hasData) {
           return const Center(
@@ -123,7 +117,7 @@ class _HomePageState extends State<HomePage> {
               Center(
                 child: ElevatedButton(
                   onPressed: () async {
-                    address = await _determinePosition();
+                    address = await determinePosition();
                     setState(() {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -151,86 +145,6 @@ class _HomePageState extends State<HomePage> {
     return _appScaffold(
       body: _body(),
       context: context,
-    );
-  }
-
-  Future<Address> getAdresse(String lat, String lon) async {
-    var url = Uri.parse(
-      'https://api-adresse.data.gouv.fr/reverse/?lon=$lon&lat=$lat',
-    );
-    try {
-      var response = await http.get(url);
-      var rep = jsonDecode(response.body)['features'][0]['properties'];
-      Address address = Address(
-        street: rep['name'],
-        postcode: rep['postcode'],
-        city: rep['city'],
-      );
-      return address;
-    } catch (e) {
-      return Address(street: 'error');
-    }
-  }
-
-  Future<Address> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    Position pos = await Geolocator.getCurrentPosition();
-
-    Address address =
-        await getAdresse(pos.latitude.toString(), pos.longitude.toString());
-    address.lat = pos.latitude;
-    address.lon = pos.longitude;
-    return address;
-  }
-
-  Widget map(BuildContext context, Address address) {
-    return FlutterMap(
-      options: MapOptions(
-        center: LatLng(address.lat, address.lon),
-        zoom: 17,
-      ),
-      layers: [
-        TileLayerOptions(
-          urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          subdomains: ['a', 'b', 'c'],
-        ),
-        MarkerLayerOptions(
-          markers: [
-            Marker(
-              width: 80.0,
-              height: 80.0,
-              point: LatLng(address.lat, address.lon),
-              builder: (ctx) => Image.network(
-                  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/LoCos_Point.svg/1024px-LoCos_Point.svg.png'),
-            ),
-          ],
-        ),
-      ],
-      nonRotatedChildren: [
-        AttributionWidget.defaultWidget(
-          source: 'OpenStreetMap',
-          onSourceTapped: () {},
-        ),
-      ],
     );
   }
 }
