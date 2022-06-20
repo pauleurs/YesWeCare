@@ -24,7 +24,6 @@ Future<void> main() async {
       },
     ),
   );
-  // runApp(const YesWeCare());
 }
 
 class YesWeCare extends StatelessWidget {

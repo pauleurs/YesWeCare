@@ -39,7 +39,7 @@ class _SettingPageState extends State<SettingPage> {
   Widget _saveButton(BuildContext context) {
     return TextButton(
         onPressed: () {
-          user!.updateDisplayName('${firstName} ${lastName}');
+          user!.updateDisplayName('$firstName $lastName');
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Data save'),
           ));
