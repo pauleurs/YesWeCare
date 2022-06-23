@@ -45,7 +45,7 @@ class _SettingPageState extends State<SettingPage> {
               content: Text('Data save'),
             ),
           );
-          Navigator.pushNamed(context, '/home');
+          Navigator.pop(context);
         },
         child: const Text('Save'));
   }

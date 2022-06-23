@@ -1,9 +1,13 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:async';
+
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:paul/utils.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,6 +27,22 @@ class _HomePageState extends State<HomePage> {
 
   List<String> myReporting = <String>[];
   List<String> allReporting = <String>[];
+  List<String> allReportingRoute = <String>[];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ignore: no_leading_underscores_for_local_identifiers, unused_local_variable
+    String _now = DateTime.now().second.toString();
+
+    // ignore: no_leading_underscores_for_local_identifiers, unused_local_variable
+    Timer _everySecond = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      setState(() {
+        _now = DateTime.now().second.toString();
+      });
+    });
+  }
 
   Widget _appScaffold({
     required Widget body,
@@ -96,12 +116,12 @@ class _HomePageState extends State<HomePage> {
   Future<Address> _getData() async {
     DataSnapshot myRep = await ref.get();
     DataSnapshot allDanger = await allDangers.get();
-
-    FirebaseAuth.instance.currentUser!.uid;
-
+    allReportingRoute.clear();
+    allReporting.clear();
     for (var element in allDanger.children) {
       if (element.key != FirebaseAuth.instance.currentUser!.uid) {
         for (var f in element.children) {
+          allReportingRoute.add('/dangers/${element.key}/${f.key}');
           allReporting.add(f.value.toString());
         }
       }
@@ -134,11 +154,17 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         }
-        Address address = snapshot.data!;
 
+        Address address = snapshot.data!;
         return pageLoad(address, context);
       },
     );
+  }
+
+  double getDistance(double pLat, double pLng, Address address) {
+    final double distance =
+        Geolocator.distanceBetween(pLat, pLng, address.lat, address.lon);
+    return distance;
   }
 
   String parceString(String start, String pattern) {
@@ -147,6 +173,7 @@ class _HomePageState extends State<HomePage> {
     while (start[index] != ',' && start[index] != '}') {
       index = index + 1;
     }
+
     return start.substring(saveIndex + pattern.length + 1, index);
   }
 
@@ -174,76 +201,117 @@ class _HomePageState extends State<HomePage> {
             buttonUpdate(address, context),
             const SizedBox(height: 15),
             textHeader(context, 'My Reporting History ', ' : ', size: 15),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: myReporting.length >= 5 ? 5 : myReporting.length,
-              itemBuilder: (BuildContext context, int i) {
-                DateTime date = DateTime.parse(
-                  parceString(myReporting[i], 'date:'),
-                );
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 15),
-                    printDate(date),
-                    Text(
-                      'Your name : ${parceString(myReporting[i], 'name:')}',
-                      style: const TextStyle(
-                        fontSize: 17,
-                      ),
-                    ),
-                    Text(
-                        'Whats going on :\n${parceString(myReporting[i], 'description:')}'),
-                    Text(
-                      'Other information :\n${parceString(myReporting[i], 'info:')}',
-                    ),
-                    const SizedBox(height: 15),
-                    const Divider(height: 1, indent: 70),
-                  ],
-                );
-              },
-            ),
+            printMyDangers(),
             textHeader(context, 'Dangers report ', ' : ', size: 15),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: allReporting.length >= 5 ? 5 : allReporting.length,
-              itemBuilder: (BuildContext context, int i) {
-                int length = allReporting.length - 1 - i;
-                DateTime date =
-                    DateTime.parse(parceString(allReporting[length], 'date:'));
-                print(length);
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 15),
-                    Text(
-                      '${parceString(allReporting[length], 'name:').toUpperCase()} needs help',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    printDate(date, bold: false),
-                    Text(
-                      'Address :\n${parceString(allReporting[length], 'address:')}',
-                    ),
-                    Text(
-                      'Whats going on :\n${parceString(allReporting[length], 'description:')}',
-                    ),
-                    Text(
-                      'Other information :\n${parceString(allReporting[length], 'info:')}',
-                    ),
-                    const SizedBox(height: 15),
-                    const Divider(height: 1, indent: 70),
-                  ],
-                );
-              },
-            ),
+            printAllDangers(address),
           ],
         ),
       ),
+    );
+  }
+
+  ListView printMyDangers() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: myReporting.length >= 5 ? 5 : myReporting.length,
+      itemBuilder: (BuildContext context, int i) {
+        DateTime date = DateTime.parse(
+          parceString(myReporting[i], 'date:'),
+        );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 15),
+            printDate(date),
+            Text(
+              'Your name : ${parceString(myReporting[i], 'name:')}',
+              style: const TextStyle(
+                fontSize: 17,
+              ),
+            ),
+            Text(
+                'Whats going on :\n${parceString(myReporting[i], 'description:')}'),
+            Text(
+              'Other information :\n${parceString(myReporting[i], 'info:')}',
+            ),
+            const SizedBox(height: 15),
+            const Divider(height: 1, indent: 70),
+          ],
+        );
+      },
+    );
+  }
+
+  void checkNotification(String danger, int index, double distance) async {
+    DatabaseReference check = FirebaseDatabase.instance.ref(
+      '${allReportingRoute[index]}/user',
+    );
+
+    if (danger.lastIndexOf(FirebaseAuth.instance.currentUser!.uid) == -1 &&
+        allReportingRoute[index] != '') {
+      allReportingRoute[index] = '';
+      await check.update({
+        FirebaseAuth.instance.currentUser!.uid: true,
+      });
+      distance.ceil;
+      AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: 123,
+          channelKey: 'basic',
+          title: 'YesWeCare',
+          body:
+              '${parceString(danger, 'name:').toUpperCase()} needs help at ${distance.ceil()} meters\n${parceString(danger, 'address:')}',
+        ),
+      );
+    }
+  }
+
+  ListView printAllDangers(Address address) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: allReporting.length >= 5 ? 5 : allReporting.length,
+      itemBuilder: (BuildContext context, int i) {
+        int length = allReporting.length - 1 - i;
+        double distance = getDistance(
+            double.parse(parceString(allReporting[length], 'lat:')),
+            double.parse(parceString(allReporting[length], 'lon:')),
+            address);
+        DateTime date =
+            DateTime.parse(parceString(allReporting[length], 'date:'));
+
+        if (distance <= 3000) {
+          checkNotification(allReporting[length], length, distance);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 15),
+              Text(
+                '${parceString(allReporting[length], 'name:').toUpperCase()} needs help',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              printDate(date, bold: false),
+              Text(
+                'Address :\n${parceString(allReporting[length], 'address:')}',
+              ),
+              Text(
+                'Whats going on :\n${parceString(allReporting[length], 'description:')}',
+              ),
+              Text(
+                'Other information :\n${parceString(allReporting[length], 'info:')}',
+              ),
+              const SizedBox(height: 15),
+              const Divider(height: 1, indent: 70),
+            ],
+          );
+        }
+        return Container();
+      },
     );
   }
 

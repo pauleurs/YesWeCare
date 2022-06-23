@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'utils.dart';
+
+import 'package:geolocator/geolocator.dart';
 
 class AddDangerPage extends StatefulWidget {
   const AddDangerPage({Key? key}) : super(key: key);
@@ -15,6 +15,7 @@ class AddDangerPage extends StatefulWidget {
 class _AddDangerPageState extends State<AddDangerPage> {
   String street = '';
   User? user = FirebaseAuth.instance.currentUser;
+  Address? address;
 
   TextEditingController info = TextEditingController();
   TextEditingController hapend = TextEditingController();
@@ -116,6 +117,8 @@ class _AddDangerPageState extends State<AddDangerPage> {
                     "description": hapend.text,
                     "address": street,
                     "date": DateTime.now().toString(),
+                    "lat": address?.lat,
+                    "lon": address?.lon,
                   });
                   setState(() {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -123,7 +126,7 @@ class _AddDangerPageState extends State<AddDangerPage> {
                         content: Text('Request send'),
                       ),
                     );
-                    Navigator.pushNamed(context, '/home');
+                    Navigator.pop(context);
                   });
                 },
                 child: Container(
@@ -153,6 +156,7 @@ class _AddDangerPageState extends State<AddDangerPage> {
             ),
           );
         }
+        address = snapshot.data!;
         street = snapshot.data!.street;
         return customTextForm(
           (value) => {
