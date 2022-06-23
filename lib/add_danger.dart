@@ -1,8 +1,8 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'utils.dart';
 
 class AddDangerPage extends StatefulWidget {
@@ -13,6 +13,12 @@ class AddDangerPage extends StatefulWidget {
 }
 
 class _AddDangerPageState extends State<AddDangerPage> {
+  String street = '';
+  User? user = FirebaseAuth.instance.currentUser;
+
+  TextEditingController info = TextEditingController();
+  TextEditingController hapend = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,11 +39,11 @@ class _AddDangerPageState extends State<AddDangerPage> {
     );
   }
 
-  Widget _textInput(int line) {
+  Widget _textInput(int line, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),
       child: TextField(
-        //controller: controller.noteInputController,
+        controller: controller,
         onTap: () {},
         maxLength: 1000,
         minLines: line,
@@ -75,66 +81,60 @@ class _AddDangerPageState extends State<AddDangerPage> {
     );
   }
 
-  Widget _textHeader(BuildContext context, String name, String requirement) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 10.0, top: 20.0),
-        child: Text(
-          name.toUpperCase() + requirement,
-          style: const TextStyle(
-            color: Color(0xff004a54),
-            fontSize: 14.0,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _body(BuildContext context) {
-    User? user = FirebaseAuth.instance.currentUser;
-
+    String name = user!.displayName!.split(' ')[0];
     return SafeArea(
       minimum: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          udaptePosition(),
-          const SizedBox(
-            height: 15,
-          ),
-          // _textHeader(context, 'what do you want to be called ', '(optional)'),
-          customTextForm(
-            (value) => {
-              print(value),
-            },
-            const Icon(Icons.person),
-            'What do you want to be called',
-            user!.displayName!.split(' ')[0],
-          ),
-          _textHeader(context, 'Whats going on ', '(optional)'),
-          _textInput(4),
-          _textHeader(context, 'other information ', '(optional)'),
-          _textInput(4),
-          Center(
-            child: ElevatedButton(
-              onPressed: () async {
-                setState(() {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Position update'),
-                    ),
-                  );
-                });
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            udaptePosition(),
+            const SizedBox(
+              height: 15,
+            ),
+            customTextForm(
+              (value) => {
+                name = value,
               },
-              child: Container(
-                decoration: const BoxDecoration(),
-                padding: const EdgeInsets.all(10.0),
-                child: const Text('Send'),
+              const Icon(Icons.person),
+              'What do you want to be called',
+              user!.displayName!.split(' ')[0],
+            ),
+            textHeader(context, 'Whats going on ', '(optional)'),
+            _textInput(4, hapend),
+            textHeader(context, 'other information ', '(optional)'),
+            _textInput(4, info),
+            Center(
+              child: ElevatedButton(
+                onPressed: () async {
+                  DatabaseReference ref = FirebaseDatabase.instance.ref(
+                    '/dangers/${FirebaseAuth.instance.currentUser!.uid}/${DateTime.now().millisecondsSinceEpoch}',
+                  );
+                  await ref.set({
+                    "name": name,
+                    "info": info.text,
+                    "description": hapend.text,
+                    "address": street,
+                    "date": DateTime.now().toString(),
+                  });
+                  setState(() {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Request send'),
+                      ),
+                    );
+                    Navigator.pushNamed(context, '/home');
+                  });
+                },
+                child: Container(
+                  decoration: const BoxDecoration(),
+                  padding: const EdgeInsets.all(10.0),
+                  child: const Text('Send'),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -153,9 +153,10 @@ class _AddDangerPageState extends State<AddDangerPage> {
             ),
           );
         }
+        street = snapshot.data!.street;
         return customTextForm(
           (value) => {
-            print(value),
+            street = value,
           },
           const Icon(Icons.near_me),
           'Your position',

@@ -68,6 +68,7 @@ Future<Address> determinePosition() async {
       await getAdresse(pos.latitude.toString(), pos.longitude.toString());
   address.lat = pos.latitude;
   address.lon = pos.longitude;
+
   return address;
 }
 
@@ -118,6 +119,27 @@ Widget customTextForm(Function(String) onChanged, Icon icon, String labelText,
       border: InputBorder.none,
       labelText: labelText,
       prefixIcon: icon,
+    ),
+  );
+}
+
+Widget textHeader(
+  BuildContext context,
+  String name,
+  String requirement, {
+  double size = 14,
+}) {
+  return Align(
+    child: Padding(
+      padding: const EdgeInsets.only(left: 10.0, top: 20.0),
+      child: Text(
+        name.toUpperCase() + requirement,
+        style: TextStyle(
+          color: const Color(0xff004a54),
+          fontSize: size,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     ),
   );
 }
