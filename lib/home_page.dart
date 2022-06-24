@@ -187,6 +187,7 @@ class _HomePageState extends State<HomePage> {
             buttonUpdate(address, context),
             const SizedBox(height: 15),
             textHeader(context, 'My Reporting History ', ' : ', size: 15),
+            const SizedBox(height: 15),
             printMyDangers(),
             textHeader(context, 'Dangers report ', ' : ', size: 15),
             const SizedBox(height: 15),
