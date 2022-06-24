@@ -27,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   );
 
   List<String> myReporting = <String>[];
+  List<String> allMyReportingRoute = <String>[];
   List<String> allReporting = <String>[];
   List<String> allReportingRoute = <String>[];
 
@@ -103,12 +104,15 @@ class _HomePageState extends State<HomePage> {
         }
       }
     }
+    allMyReportingRoute.clear();
     myReporting.clear();
     for (var element in myRep.children) {
+      allMyReportingRoute.add(
+          '/dangers/${FirebaseAuth.instance.currentUser!.uid}/${element.key}');
+
       String tempo = element.value.toString();
       myReporting.add(tempo);
     }
-
     return determinePosition();
   }
 
@@ -147,6 +151,10 @@ class _HomePageState extends State<HomePage> {
 
   String parceString(String start, String pattern) {
     int index = start.lastIndexOf(pattern);
+    if (start.length <= index || index == -1) {
+      return '';
+    }
+
     int saveIndex = index;
     while (start[index] != ',' && start[index] != '}') {
       index = index + 1;
@@ -197,6 +205,9 @@ class _HomePageState extends State<HomePage> {
       itemCount: myReporting.length >= 5 ? 5 : myReporting.length,
       itemBuilder: (BuildContext context, int i) {
         Danger danger = getDanger(myReporting[i]);
+        DatabaseReference check =
+            FirebaseDatabase.instance.ref(allMyReportingRoute[i]);
+
         return Card(
           child: ListTile(
             onTap: () {
@@ -206,6 +217,16 @@ class _HomePageState extends State<HomePage> {
                   return DangerPage(danger: danger);
                 },
               );
+            },
+            onLongPress: () async {
+              await check.remove();
+              setState(() {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Remove'),
+                  ),
+                );
+              });
             },
             leading: const Icon(
               Icons.warning,
