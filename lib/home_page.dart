@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:paul/danger_view.dart';
 import 'package:paul/utils.dart';
 
 class HomePage extends StatefulWidget {
@@ -89,30 +90,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget printAdress(Address address) {
-    return Container(
-      width: MediaQuery.of(context).size.width - 40,
-      color: Colors.grey.shade200,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            address.city,
-            style: const TextStyle(
-              fontSize: 27,
-            ),
-          ),
-          Text(
-            address.street,
-            style: const TextStyle(
-              fontSize: 17,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<Address> _getData() async {
     DataSnapshot myRep = await ref.get();
     DataSnapshot allDanger = await allDangers.get();
@@ -144,7 +121,8 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               children: [
                 const SizedBox(height: 30),
-                printAdress(Address(street: 'loading', city: 'loading')),
+                printAdress(
+                    Address(street: 'loading', city: 'loading'), context),
                 const SizedBox(height: 185),
                 const Text('loading ...', style: TextStyle(fontSize: 20)),
                 const SizedBox(height: 200),
@@ -187,7 +165,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(
               height: 15,
             ),
-            printAdress(address),
+            printAdress(address, context),
             const SizedBox(
               height: 15,
             ),
@@ -203,7 +181,9 @@ class _HomePageState extends State<HomePage> {
             textHeader(context, 'My Reporting History ', ' : ', size: 15),
             printMyDangers(),
             textHeader(context, 'Dangers report ', ' : ', size: 15),
+            const SizedBox(height: 15),
             printAllDangers(address),
+            const SizedBox(height: 50),
           ],
         ),
       ),
@@ -216,29 +196,26 @@ class _HomePageState extends State<HomePage> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: myReporting.length >= 5 ? 5 : myReporting.length,
       itemBuilder: (BuildContext context, int i) {
-        DateTime date = DateTime.parse(
-          parceString(myReporting[i], 'date:'),
-        );
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 15),
-            printDate(date),
-            Text(
-              'Your name : ${parceString(myReporting[i], 'name:')}',
-              style: const TextStyle(
-                fontSize: 17,
-              ),
+        Danger danger = getDanger(myReporting[i]);
+        return Card(
+          child: ListTile(
+            onTap: () {
+              showModalBottomSheet<void>(
+                context: context,
+                builder: (BuildContext context) {
+                  return DangerPage(danger: danger);
+                },
+              );
+            },
+            leading: const Icon(
+              Icons.warning,
+              size: 45,
             ),
-            Text(
-                'Whats going on :\n${parceString(myReporting[i], 'description:')}'),
-            Text(
-              'Other information :\n${parceString(myReporting[i], 'info:')}',
-            ),
-            const SizedBox(height: 15),
-            const Divider(height: 1, indent: 70),
-          ],
+            title: Text('Your name : ${danger.name}'),
+            subtitle: Text(
+                'Whats going on :\n${danger.info}\nOther information :\n${danger.description}'),
+            isThreeLine: true,
+          ),
         );
       },
     );
@@ -268,6 +245,25 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Danger getDanger(String string) {
+    DateTime date = DateTime.parse(parceString(string, 'date:'));
+    return Danger(
+      date: date,
+      name: parceString(string, 'name:'),
+      info: parceString(string, 'info:'),
+      description: parceString(string, 'description:'),
+      adress: Address(
+        street: parceString(string, 'address:'),
+        lat: double.parse(
+          parceString(string, 'lat:'),
+        ),
+        lon: double.parse(
+          parceString(string, 'lon:'),
+        ),
+      ),
+    );
+  }
+
   ListView printAllDangers(Address address) {
     return ListView.builder(
       shrinkWrap: true,
@@ -275,39 +271,32 @@ class _HomePageState extends State<HomePage> {
       itemCount: allReporting.length >= 5 ? 5 : allReporting.length,
       itemBuilder: (BuildContext context, int i) {
         int length = allReporting.length - 1 - i;
-        double distance = getDistance(
-            double.parse(parceString(allReporting[length], 'lat:')),
-            double.parse(parceString(allReporting[length], 'lon:')),
-            address);
-        DateTime date =
-            DateTime.parse(parceString(allReporting[length], 'date:'));
+        Danger danger = getDanger(allReporting[length]);
+        double distance =
+            getDistance(danger.adress.lat, danger.adress.lon, address);
 
         if (distance <= 3000) {
           checkNotification(allReporting[length], length, distance);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 15),
-              Text(
-                '${parceString(allReporting[length], 'name:').toUpperCase()} needs help',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+          return Card(
+            child: ListTile(
+              onTap: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return DangerPage(danger: danger);
+                  },
+                );
+              },
+              leading: const Icon(
+                Icons.warning,
+                size: 45,
               ),
-              printDate(date, bold: false),
-              Text(
-                'Address :\n${parceString(allReporting[length], 'address:')}',
-              ),
-              Text(
-                'Whats going on :\n${parceString(allReporting[length], 'description:')}',
-              ),
-              Text(
-                'Other information :\n${parceString(allReporting[length], 'info:')}',
-              ),
-              const SizedBox(height: 15),
-              const Divider(height: 1, indent: 70),
-            ],
+              title: Text('${danger.name.toUpperCase()} needs help !'),
+              subtitle: Text(
+                  '${distance.ceil()} meters from you\nClick here for more details ...'),
+              trailing: const Icon(Icons.navigate_next_sharp),
+              isThreeLine: true,
+            ),
           );
         }
         return Container();

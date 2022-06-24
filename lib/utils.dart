@@ -23,6 +23,21 @@ class Address {
   });
 }
 
+class Danger {
+  Address adress;
+  DateTime date;
+  String description;
+  String info;
+  String name;
+  Danger({
+    required this.adress,
+    required this.date,
+    this.description = '',
+    this.info = '',
+    this.name = '',
+  });
+}
+
 Future<Address> getAdresse(String lat, String lon) async {
   var url = Uri.parse(
     'https://api-adresse.data.gouv.fr/reverse/?lon=$lon&lat=$lat',
@@ -72,38 +87,6 @@ Future<Address> determinePosition() async {
   return address;
 }
 
-Widget map(BuildContext context, Address address) {
-  return FlutterMap(
-    options: MapOptions(
-      center: LatLng(address.lat, address.lon),
-      zoom: 17,
-    ),
-    layers: [
-      TileLayerOptions(
-        urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        subdomains: ['a', 'b', 'c'],
-      ),
-      MarkerLayerOptions(
-        markers: [
-          Marker(
-            width: 80.0,
-            height: 80.0,
-            point: LatLng(address.lat, address.lon),
-            builder: (ctx) => Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/LoCos_Point.svg/1024px-LoCos_Point.svg.png'),
-          ),
-        ],
-      ),
-    ],
-    nonRotatedChildren: [
-      AttributionWidget.defaultWidget(
-        source: 'OpenStreetMap',
-        onSourceTapped: () {},
-      ),
-    ],
-  );
-}
-
 Widget customTextForm(Function(String) onChanged, Icon icon, String labelText,
     String initialValue) {
   return TextFormField(
@@ -141,5 +124,61 @@ Widget textHeader(
         ),
       ),
     ),
+  );
+}
+
+Widget printAdress(Address address, BuildContext context) {
+  return Container(
+    width: MediaQuery.of(context).size.width - 40,
+    color: Colors.grey.shade200,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          address.city,
+          style: const TextStyle(
+            fontSize: 27,
+          ),
+        ),
+        Text(
+          address.street,
+          style: const TextStyle(
+            fontSize: 17,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget map(BuildContext context, Address address) {
+  return FlutterMap(
+    options: MapOptions(
+      center: LatLng(address.lat, address.lon),
+      zoom: 17,
+    ),
+    layers: [
+      TileLayerOptions(
+        urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        subdomains: ['a', 'b', 'c'],
+      ),
+      MarkerLayerOptions(
+        markers: [
+          Marker(
+            width: 80.0,
+            height: 80.0,
+            point: LatLng(address.lat, address.lon),
+            builder: (ctx) => Image.network(
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/LoCos_Point.svg/1024px-LoCos_Point.svg.png'),
+          ),
+        ],
+      ),
+    ],
+    nonRotatedChildren: [
+      AttributionWidget.defaultWidget(
+        source: 'OpenStreetMap',
+        onSourceTapped: () {},
+      ),
+    ],
   );
 }

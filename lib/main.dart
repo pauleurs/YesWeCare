@@ -12,7 +12,6 @@ import 'login_register.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AwesomeNotifications().initialize('resource://drawable/notification_icon', [
-    // notification icon
     NotificationChannel(
       channelGroupKey: 'basic_test',
       channelKey: 'basic',
@@ -22,7 +21,6 @@ Future<void> main() async {
       importance: NotificationImportance.High,
       enableVibration: true,
     ),
-
     NotificationChannel(
         channelGroupKey: 'image_test',
         channelKey: 'image',
@@ -32,12 +30,9 @@ Future<void> main() async {
         ledColor: Colors.white,
         channelShowBadge: true,
         importance: NotificationImportance.High)
-
-    //add more notification type with different configuration
   ]);
   bool isallowed = await AwesomeNotifications().isNotificationAllowed();
   if (!isallowed) {
-    //no permission of local notification
     await AwesomeNotifications().requestPermissionToSendNotifications();
   }
   await Firebase.initializeApp(
@@ -45,6 +40,7 @@ Future<void> main() async {
   );
   runApp(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: '',
       initialRoute: '/',
       routes: {
